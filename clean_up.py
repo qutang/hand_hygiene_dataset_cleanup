@@ -95,7 +95,7 @@ def _convert_sensors(root, pid, data_type,
                 "Start synchronizing this sensor to annotations based on hand clappings")
 
             peak_cache_path = os.path.join(
-                root, pid, 'Cache', os.path.basename(sensor_file).replace('.csv', '.peak'))
+                root, pid, 'Cache', os.path.basename(sensor_file).replace('.csv', '.peak').replace('feather', 'peak'))
             if os.path.exists(peak_cache_path):
                 logger.info("Loading peak cache...")
                 with open(peak_cache_path, 'r') as f:
