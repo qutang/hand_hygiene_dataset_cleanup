@@ -17,3 +17,11 @@ See the hosted unprocessed dataset at: https://github.com/qutang/hand_hygiene_da
     ```bash
     python run_post_clean.py [PID_LIST]
     ```
+
+3. Send cleaned up AGHH to the public repo
+
+    `[DATASET]` could be `aghh` or `flhh`.
+
+    ```bash
+    python send_clean.py [DATASET]
+    ```
