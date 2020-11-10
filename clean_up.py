@@ -33,35 +33,43 @@ HAND_CLAPPING_TIME_OFFSETS = [
 ]
 
 
-def clean_up(root, pid, sr, skip_sync=False, remove_exists=True, date_range=None, auto_range='W-MON'):
+def clean_up(root, pid, sr, skip_sync=False, remove_exists=True, annot_profile="**", raw_location='subj_folder', date_range=None, auto_range='W-MON'):
     log_file = arus.mh.get_subject_log(root, pid, 'cleanup.log')
     if os.path.exists(log_file):
         os.remove(log_file)
     handle_id = logger.add(log_file)
-    convert_to_mhealth(root, pid, skip_sync=skip_sync,
+    convert_to_mhealth(root, pid,
+                       skip_sync=skip_sync,
+                       raw_location=raw_location,
+                       annot_profile=annot_profile,
                        remove_exists=remove_exists)
     arus.cli.convert_to_signaligner_both(
         root, pid, sr, date_range=date_range, auto_range=auto_range)
     logger.remove(handle_id)
 
 
-def convert_to_mhealth(root, pid, skip_sync=False, correct_orientation=True, remove_exists=True):
+def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_location='subj_folder', correct_orientation=True, remove_exists=True):
     master_folder = os.path.join(root, pid, arus.mh.MASTER_FOLDER)
     if remove_exists and os.path.exists(master_folder):
         logger.info(f'Remove existing {master_folder}')
         shutil.rmtree(master_folder)
-    annot_df, task_annot_df = _convert_annotations(root, pid)
+    annot_df, task_annot_df = _convert_annotations(
+        root, pid, annot_profile=annot_profile)
     _convert_sensors(root, pid,
                      data_type='AccelerometerCalibrated', correct_orientation=correct_orientation,
-                     skip_sync=skip_sync, annot_df=annot_df, task_annot_df=task_annot_df)
+                     skip_sync=skip_sync,
+                     raw_location=raw_location,
+                     annot_df=annot_df, task_annot_df=task_annot_df)
     _convert_sensors(root, pid, data_type='IMUTenAxes',
                      skip_sync=skip_sync,
                      correct_orientation=correct_orientation,
+                     raw_location=raw_location,
                      annot_df=annot_df, task_annot_df=task_annot_df)
 
 
 def _convert_sensors(root, pid, data_type,
                      correct_orientation=True,
+                     raw_location="subj_folder",
                      skip_sync=True, annot_df=None, task_annot_df=None):
     logger.info(
         f"Convert {data_type} data to mhealth format for hand hygiene raw dataset")
@@ -75,7 +83,7 @@ def _convert_sensors(root, pid, data_type,
             f'The data type {data_type} is not supported')
 
     master_pid = pid.split('_')[0]
-    if master_pid in ['P19', 'P17']:
+    if master_pid in ['P19', 'P17'] or raw_location != 'subj_folder':
         sensor_files = glob.glob(os.path.join(
             root, 'OriginalRawCrossParticipants', master_pid, filename_pattern))
     else:
@@ -113,7 +121,7 @@ def _convert_sensors(root, pid, data_type,
 
             session_sensor_df = cache_session(sensor_df, task_annot_df)
             session_sensor_df.to_csv(os.path.join(
-                root, pid, "OriginalRaw", os.path.basename(sensor_file)), index=False)
+                root, pid, "OriginalRaw", os.path.basename(sensor_file).replace('csv', 'csv.cache')), index=False)
 
             session_sensor_df, peak_kwargs = sync._sync(
                 session_sensor_df, annot_df, task_annot_df, pid=pid, sid=meta['SENSOR_ID'], data_type=data_type, **peak_kwargs)
@@ -210,11 +218,11 @@ def filter_exist_cols(col_names, columns):
     return list(filter(lambda name: name in columns, col_names)), list(filter(lambda name: name not in columns, col_names))
 
 
-def _convert_annotations(root, pid):
+def _convert_annotations(root, pid, annot_profile='**'):
     logger.info(
         "Convert annotation data to mhealth format for hand hygiene raw dataset")
     raw_annotation_files = glob.glob(os.path.join(
-        root, pid, "OriginalRaw", "**", "*annotations.csv"), recursive=True)
+        root, pid, "OriginalRaw", annot_profile, "*annotations.csv"), recursive=True)
     app_annotation_files = list(filter(
         lambda f: 'Side' not in f, raw_annotation_files))
 
