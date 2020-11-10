@@ -55,11 +55,11 @@ def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_locat
         shutil.rmtree(master_folder)
     annot_df, task_annot_df = _convert_annotations(
         root, pid, annot_profile=annot_profile)
-    _convert_sensors(root, pid,
-                     data_type='AccelerometerCalibrated', correct_orientation=correct_orientation,
-                     skip_sync=skip_sync,
-                     raw_location=raw_location,
-                     annot_df=annot_df, task_annot_df=task_annot_df)
+    # _convert_sensors(root, pid,
+    #                  data_type='AccelerometerCalibrated', correct_orientation=correct_orientation,
+    #                  skip_sync=skip_sync,
+    #                  raw_location=raw_location,
+    #                  annot_df=annot_df, task_annot_df=task_annot_df)
     _convert_sensors(root, pid, data_type='IMUTenAxes',
                      skip_sync=skip_sync,
                      correct_orientation=correct_orientation,
@@ -90,8 +90,9 @@ def _convert_sensors(root, pid, data_type,
         sensor_files = glob.glob(os.path.join(
             root, pid, "OriginalRaw", filename_pattern), recursive=True)
 
-    sensor_files = list(
-        filter(lambda f: 'csv' in f or 'feather' in f, sensor_files))
+    sensor_files = set(map(lambda f: f.split('.')[0] + '.csv', sensor_files))
+    # sensor_files = list(
+    #     filter(lambda f: f.endswith('csv') or f.endswith('feather'), sensor_files))
 
     for sensor_file in sensor_files:
 
@@ -121,16 +122,16 @@ def _convert_sensors(root, pid, data_type,
 
             session_sensor_df = cache_session(sensor_df, task_annot_df)
             session_sensor_df.to_csv(os.path.join(
-                root, pid, "OriginalRaw", os.path.basename(sensor_file).replace('csv', 'csv.cache')), index=False)
+                root, pid, "Cache", os.path.basename(sensor_file)), index=False)
 
-            session_sensor_df, peak_kwargs = sync._sync(
-                session_sensor_df, annot_df, task_annot_df, pid=pid, sid=meta['SENSOR_ID'], data_type=data_type, **peak_kwargs)
+            sensor_df, peak_kwargs = sync._sync(
+                sensor_df, annot_df, task_annot_df, pid=pid, sid=meta['SENSOR_ID'], data_type=data_type, **peak_kwargs)
             st = annot_df.iloc[0, 1] - pd.Timedelta(10, unit='second')
             et = annot_df.iloc[-1, 2] + pd.Timedelta(10, unit='second')
 
             logger.info(f'Current session: {st} - {et}')
             sensor_df = arus.ext.pandas.segment_by_time(
-                session_sensor_df, seg_st=st, seg_et=et)
+                sensor_df, seg_st=st, seg_et=et)
 
             # # remove average for magnetometers
             # if data_type == 'IMUTenAxes':
@@ -165,8 +166,10 @@ def _convert_sensors(root, pid, data_type,
 
 
 def cache_session(sensor_df, task_annot_df):
-    st = task_annot_df.iloc[0, 0] - pd.Timedelta(1, unit='hour')
-    et = task_annot_df.iloc[-1, 0] + pd.Timedelta(1, unit='hour')
+    st = task_annot_df.iloc[0, 1] - pd.Timedelta(10, unit='minute')
+    et = task_annot_df.iloc[-1, 2] + pd.Timedelta(10, unit='minute')
+    print(st)
+    print(et)
     sensor_df = arus.ext.pandas.segment_by_time(
         sensor_df, seg_st=st, seg_et=et)
     return sensor_df
@@ -192,7 +195,7 @@ def _read_raw_actigraph(sensor_file):
         meta = reader.get_meta()
         sensor_df = next(read_iterator.get_data())
         # cache this as feather object
-        feather.write_feather(sensor_df, cache_file)
+        feather.write_feather(sensor_df, cache_file, version=2)
         joblib.dump(meta, cache_meta_file)
     return sensor_df, meta
 
