@@ -168,8 +168,13 @@ def _sync(sensor_df, annot_df, task_annot_df, height=-1, x_height=-1, y_height=-
     for row in sync_annots.itertuples(index=False):
         st = row.START_TIME
         et = row.STOP_TIME
+        print(st)
+        print(et)
         sync_sensor_df = arus.ext.pandas.segment_by_time(
             sensor_df, seg_st=st + pd.Timedelta(init_offset, 's'), seg_et=et + pd.Timedelta(init_offset, 's'))
+
+        print(sync_sensor_df.head(n=3))
+        print(sync_sensor_df.tail(n=3))
 
         if pid == 'P9_5' and sid == 'TAS1E23150167':
             sync_sensor_df = arus.ext.pandas.segment_by_time(
