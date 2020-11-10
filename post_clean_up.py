@@ -25,13 +25,11 @@ def _get_expert_annotation_file(pid):
         return os.path.join(expert_folder, expert_names[0])
     elif len(expert_names) == 0:
         logger.warning(
-            'Please make sure you use Signaligner to check the annotations before running post-clean command.')
-        exit(1)
+            'Please make sure you use Signaligner to check the annotations before running post-clean command. Skip this one.')
         return None
     elif len(expert_names) > 1:
         logger.warning(
-            "More than one expert annotation files are found!, Please double check the folder.")
-        exit(1)
+            "More than one expert annotation files are found!, Please double check the folder. Skip this one.")
         return None
 
 
@@ -52,29 +50,29 @@ def _convert_expert_annotations(root, pid):
 
     logger.info('Update expert annotation file')
     src_expert_path = _get_expert_annotation_file(pid)
-    dest_expert_path = os.path.join(
-        root, pid, "OriginalRaw", os.path.basename(src_expert_path))
-    shutil.copyfile(src_expert_path, dest_expert_path)
+    if src_expert_path is not None:
+        dest_expert_path = os.path.join(
+            root, pid, "OriginalRaw", os.path.basename(src_expert_path))
+        shutil.copyfile(src_expert_path, dest_expert_path)
+        expert_annot_df = _read_expert_annotation_file(
+            dest_expert_path)
 
-    expert_annot_df = _read_expert_annotation_file(
-        dest_expert_path)
+        if expert_annot_df is not None:
+            existing_expert_annots = glob.glob(os.path.join(
+                root, pid,
+                arus.mh.MASTER_FOLDER,
+                '**', '*Expert*.annotation.csv'), recursive=True)
+            for path in existing_expert_annots:
+                logger.info(f'Remove existing expert annotation file {path}')
+                os.remove(path)
 
-    if expert_annot_df is not None:
-        existing_expert_annots = glob.glob(os.path.join(
-            root, pid,
-            arus.mh.MASTER_FOLDER,
-            '**', '*Expert*.annotation.csv'), recursive=True)
-        for path in existing_expert_annots:
-            logger.info(f'Remove existing expert annotation file {path}')
-            os.remove(path)
-
-        writer = arus.mh.MhealthFileWriter(
-            root, pid, hourly=True, date_folders=True)
-        writer.set_for_annotation("HandHygiene", "Expert")
-        writer.write_csv(expert_annot_df, append=False, block=True)
-    else:
-        logger.warning(
-            "No expert annotated hand side information is found, skip this task.")
+            writer = arus.mh.MhealthFileWriter(
+                root, pid, hourly=True, date_folders=True)
+            writer.set_for_annotation("HandHygiene", "Expert")
+            writer.write_csv(expert_annot_df, append=False, block=True)
+        else:
+            logger.warning(
+                "No expert annotated hand side information is found, skip this task.")
 
 
 if __name__ == "__main__":
