@@ -75,7 +75,7 @@ def _convert_sensors(root, pid, data_type,
             f'The data type {data_type} is not supported')
 
     master_pid = pid.split('_')[0]
-    if master_pid in ['P19']:
+    if master_pid in ['P19', 'P17']:
         sensor_files = glob.glob(os.path.join(
             root, 'OriginalRawCrossParticipants', master_pid, filename_pattern))
     else:
@@ -251,7 +251,7 @@ def _convert_annotations(root, pid):
         task_annot_df = None
 
     if annot_df is not None:
-        if annot_df.iloc[0, 0] >= pd.Timestamp("2020-11-01"):
+        if 'P19' in pid and annot_df.iloc[0, 0] >= pd.Timestamp("2020-11-01"):
             # Shift due to day-saving time
             annot_df.iloc[:, [0, 1, 2]] = annot_df.iloc[:,
                                                         [0, 1, 2]] + pd.Timedelta(1, 'hour')
@@ -260,7 +260,7 @@ def _convert_annotations(root, pid):
         writer.set_for_annotation("HandHygiene", "App")
         writer.write_csv(annot_df, append=False, block=True)
     if task_annot_df is not None:
-        if task_annot_df.iloc[0, 0] >= pd.Timestamp("2020-11-01"):
+        if 'P19' in pid and task_annot_df.iloc[0, 0] >= pd.Timestamp("2020-11-01"):
             # Shift due to day-saving time
             task_annot_df.iloc[:, [0, 1, 2]] = task_annot_df.iloc[:,
                                                                   [0, 1, 2]] + pd.Timedelta(1, 'hour')
@@ -336,7 +336,7 @@ def _read_raw_annotation_file(filepath):
 
 
 if __name__ == "__main__":
-    root = 'D:/datasets/hand_hygiene'
-    pid = 'P3_4'
+    root = 'D:/datasets/hand_hygiene_dataset'
+    pid = 'P17_1'
     sr = 80
     clean_up(root, pid, sr, auto_range='W-MON')
