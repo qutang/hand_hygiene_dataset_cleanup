@@ -15,6 +15,12 @@ if __name__ == "__main__":
     else:
         raise NotImplementedError('This input argument is not supported.')
 
+    discard_annot_files = glob(os.path.join(
+        output_folder, '*/MasterSynced/**/HandHygiene.Expert-HandHygiene.*.annotation.csv'), recursive=True)
+    for f in discard_annot_files:
+        logger.info(f'Remove {f}')
+        os.remove(f)
+
     master_files = glob(
         os.path.join(
             root, '*/MasterSynced/**/*.csv'), recursive=True)
