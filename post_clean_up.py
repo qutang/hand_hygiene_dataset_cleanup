@@ -51,6 +51,14 @@ def _convert_expert_annotations(root, pid):
     logger.info('Update expert annotation file')
     src_expert_paths = _get_expert_annotation_file(pid)
     if src_expert_paths is not None:
+        existing_expert_annots = glob.glob(os.path.join(
+            root, pid,
+            arus.mh.MASTER_FOLDER,
+            '**', '*Expert*.annotation.csv'), recursive=True)
+        for path in existing_expert_annots:
+            logger.info(
+                f'Remove existing expert annotation file {path}')
+            os.remove(path)
         for src_expert_path in src_expert_paths:
             dest_expert_path = os.path.join(
                 root, pid, "OriginalRaw", os.path.basename(src_expert_path))
@@ -59,15 +67,6 @@ def _convert_expert_annotations(root, pid):
                 dest_expert_path)
 
             if expert_annot_df is not None:
-                existing_expert_annots = glob.glob(os.path.join(
-                    root, pid,
-                    arus.mh.MASTER_FOLDER,
-                    '**', '*Expert*.annotation.csv'), recursive=True)
-                for path in existing_expert_annots:
-                    logger.info(
-                        f'Remove existing expert annotation file {path}')
-                    os.remove(path)
-
                 writer = arus.mh.MhealthFileWriter(
                     root, pid, hourly=True, date_folders=True)
                 writer.set_for_annotation("HandHygiene", "Expert")
