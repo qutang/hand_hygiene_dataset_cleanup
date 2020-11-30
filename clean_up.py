@@ -48,7 +48,7 @@ def clean_up(root, pid, sr, skip_sync=False, remove_exists=True, annot_profile="
     logger.remove(handle_id)
 
 
-def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_location='subj_folder', correct_orientation=True, remove_exists=True):
+def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_location='subj_folder', correct_orientation=True, remove_exists=True, skip_sensors=False):
     master_folder = os.path.join(root, pid, arus.mh.MASTER_FOLDER)
     if remove_exists and os.path.exists(master_folder):
         logger.info(f'Remove existing {master_folder}')
@@ -60,11 +60,12 @@ def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_locat
     #                  skip_sync=skip_sync,
     #                  raw_location=raw_location,
     #                  annot_df=annot_df, task_annot_df=task_annot_df)
-    _convert_sensors(root, pid, data_type='IMUTenAxes',
-                     skip_sync=skip_sync,
-                     correct_orientation=correct_orientation,
-                     raw_location=raw_location,
-                     annot_df=annot_df, task_annot_df=task_annot_df)
+    if not skip_sensors:
+        _convert_sensors(root, pid, data_type='IMUTenAxes',
+                         skip_sync=skip_sync,
+                         correct_orientation=correct_orientation,
+                         raw_location=raw_location,
+                         annot_df=annot_df, task_annot_df=task_annot_df)
 
 
 def _convert_sensors(root, pid, data_type,
@@ -83,7 +84,7 @@ def _convert_sensors(root, pid, data_type,
             f'The data type {data_type} is not supported')
 
     master_pid = pid.split('_')[0]
-    if master_pid in ['P19', 'P17'] or raw_location != 'subj_folder':
+    if master_pid in ['P19', 'P17', 'P18'] or raw_location != 'subj_folder':
         sensor_files = glob.glob(os.path.join(
             root, 'OriginalRawCrossParticipants', master_pid, filename_pattern))
     else:
@@ -121,6 +122,8 @@ def _convert_sensors(root, pid, data_type,
                 }
 
             session_sensor_df = cache_session(sensor_df, task_annot_df)
+            os.makedirs(os.path.join(
+                root, pid, "Cache"), exist_ok=True)
             session_sensor_df.to_csv(os.path.join(
                 root, pid, "Cache", os.path.basename(sensor_file)), index=False)
 
