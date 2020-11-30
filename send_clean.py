@@ -10,7 +10,7 @@ if __name__ == "__main__":
         root = 'D:/Datasets/hand_hygiene_dataset'
         output_folder = 'C:/Users/tqshe/projects/hand_hygiene_release/inhome_data'
     elif dataset == 'flhh':
-        root = 'D:/Datasets/hand_hygiene_openset'
+        root = 'D:/Datasets/hand_hygiene_dataset_openset'
         output_folder = 'C:/Users/tqshe/projects/hand_hygiene_release/freeliving_data'
     else:
         raise NotImplementedError('This input argument is not supported.')
