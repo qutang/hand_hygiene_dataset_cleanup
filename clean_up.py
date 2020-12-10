@@ -84,7 +84,7 @@ def _convert_sensors(root, pid, data_type,
             f'The data type {data_type} is not supported')
 
     master_pid = pid.split('_')[0]
-    if master_pid in ['P19', 'P17', 'P18'] or raw_location != 'subj_folder':
+    if master_pid in ['P19', 'P17', 'P18', 'P12'] or raw_location != 'subj_folder':
         sensor_files = glob.glob(os.path.join(
             root, 'OriginalRawCrossParticipants', master_pid, filename_pattern))
     else:
