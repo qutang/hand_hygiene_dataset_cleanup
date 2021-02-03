@@ -4,6 +4,14 @@ See the description about the dataset at: https://github.com/mhealthgroup/person
 See the cleaned up dataset at: https://github.com/mhealthgroup/personal_hand_hygiene_detection.  
 See the hosted unprocessed dataset at: https://github.com/qutang/hand_hygiene_dataset.  
 
+
+## Install the local package before using the scripts
+
+```bash
+pip install -r requirements.txt
+```
+
+
 ## Usage
 
 1. Clean up and convert raw data to mhealth format
