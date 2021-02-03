@@ -1,2 +1,1 @@
-arus>=1.1.18
-pyarrow
+-e ./hhdataset

@@ -7,7 +7,7 @@ import pandas as pd
 from loguru import logger
 
 
-def convert_to_mhealth(root, pid):
+def convert_expert_annotations(root, pid):
     log_file = arus.mh.get_subject_log(root, pid, 'post_cleanup.log')
     if os.path.exists(log_file):
         os.remove(log_file)
@@ -77,4 +77,4 @@ def _convert_expert_annotations(root, pid):
 
 
 if __name__ == "__main__":
-    convert_to_mhealth('D:/datasets/hand_hygiene', 'P1-1')
+    convert_expert_annotations()('D:/datasets/hand_hygiene', 'P1-1')

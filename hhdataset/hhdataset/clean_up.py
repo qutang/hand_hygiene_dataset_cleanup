@@ -13,9 +13,9 @@ from loguru import logger
 import pyarrow.feather as feather
 import joblib
 
-import correct_orientation as ori
-import helpers
-import sync_sensor as sync
+from . import correct_orientation as ori
+from . import helpers
+from . import sync_sensor as sync
 
 HAND_CLAPPING_TIME_OFFSETS = [
     (datetime.timedelta(seconds=1, milliseconds=260),
@@ -48,24 +48,18 @@ def clean_up(root, pid, sr, skip_sync=False, remove_exists=True, annot_profile="
     logger.remove(handle_id)
 
 
-def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_location='subj_folder', correct_orientation=True, remove_exists=True, skip_sensors=False):
+def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_location='subj_folder', correct_orientation=True, remove_exists=True):
     master_folder = os.path.join(root, pid, arus.mh.MASTER_FOLDER)
     if remove_exists and os.path.exists(master_folder):
         logger.info(f'Remove existing {master_folder}')
         shutil.rmtree(master_folder)
     annot_df, task_annot_df = _convert_annotations(
         root, pid, annot_profile=annot_profile)
-    # _convert_sensors(root, pid,
-    #                  data_type='AccelerometerCalibrated', correct_orientation=correct_orientation,
-    #                  skip_sync=skip_sync,
-    #                  raw_location=raw_location,
-    #                  annot_df=annot_df, task_annot_df=task_annot_df)
-    if not skip_sensors:
-        _convert_sensors(root, pid, data_type='IMUTenAxes',
-                         skip_sync=skip_sync,
-                         correct_orientation=correct_orientation,
-                         raw_location=raw_location,
-                         annot_df=annot_df, task_annot_df=task_annot_df)
+    _convert_sensors(root, pid, data_type='IMUTenAxes',
+                     skip_sync=skip_sync,
+                     correct_orientation=correct_orientation,
+                     raw_location=raw_location,
+                     annot_df=annot_df, task_annot_df=task_annot_df)
 
 
 def _convert_sensors(root, pid, data_type,
@@ -92,8 +86,6 @@ def _convert_sensors(root, pid, data_type,
             root, pid, "OriginalRaw", filename_pattern), recursive=True)
 
     sensor_files = set(map(lambda f: f.split('.')[0] + '.csv', sensor_files))
-    # sensor_files = list(
-    #     filter(lambda f: f.endswith('csv') or f.endswith('feather'), sensor_files))
 
     for sensor_file in sensor_files:
 
@@ -136,11 +128,6 @@ def _convert_sensors(root, pid, data_type,
             sensor_df = arus.ext.pandas.segment_by_time(
                 sensor_df, seg_st=st, seg_et=et)
 
-            # # remove average for magnetometers
-            # if data_type == 'IMUTenAxes':
-            #     logger.info(f'Removing average for magnetometer sensors...')
-            #     sensor_df = _remove_average_for_mag(sensor_df)
-
             # cache peak keywords
             logger.info('Caching peak parameters...')
             os.makedirs(os.path.dirname(peak_cache_path), exist_ok=True)
@@ -175,14 +162,6 @@ def cache_session(sensor_df, task_annot_df):
     print(et)
     sensor_df = arus.ext.pandas.segment_by_time(
         sensor_df, seg_st=st, seg_et=et)
-    return sensor_df
-
-
-def _remove_average_for_mag(sensor_df):
-    col_names = arus.mh.parse_column_names_from_data_type('IMUMagnetometer')
-    for col_name in col_names:
-        sensor_df.loc[:, col_name] = sensor_df.loc[:,
-                                                   col_name] - sensor_df.loc[:, col_name].mean()
     return sensor_df
 
 
