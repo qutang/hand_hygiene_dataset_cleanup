@@ -2,18 +2,25 @@ import shutil
 from glob import glob
 import os
 from loguru import logger
-import sys
+import argparse
+
+
+def setup_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "root", help="The root folder of the raw hand hygiene dataset"
+    )
+    parser.add_argument(
+        "output", help="The output folder of the cleaned hand hygiene dataset"
+    )
+    return parser
+
 
 if __name__ == "__main__":
-    dataset = sys.argv[1]
-    if dataset == 'aghh':
-        root = 'D:/Datasets/hand_hygiene_dataset'
-        output_folder = 'C:/Users/tqshe/projects/hand_hygiene_release/inhome_data'
-    elif dataset == 'flhh':
-        root = 'D:/Datasets/hand_hygiene_dataset_openset'
-        output_folder = 'C:/Users/tqshe/projects/hand_hygiene_release/freeliving_data'
-    else:
-        raise NotImplementedError('This input argument is not supported.')
+    parser = setup_args()
+    args = parser.parse_args()
+    root = args.dataset
+    output_folder = args.output
 
     discard_annot_files = glob(os.path.join(
         output_folder, '*/MasterSynced/**/HandHygiene.Expert-HandHygiene.*.annotation.csv'), recursive=True)

@@ -9,19 +9,20 @@ See the hosted unprocessed dataset at: https://github.com/qutang/hand_hygiene_da
 1. Clean up and convert raw data to mhealth format
 
     ```bash
-    python run_clean_up.py [PID_LIST]
+    # See help information
+    python run_clean_up.py -h
     ```
 
 2. Copy expert-corrected annotations from signaligner back to AGHH
 
     ```bash
-    python run_post_clean.py [PID_LIST]
+    # See help information
+    python run_post_clean.py -h
     ```
 
 3. Send cleaned up AGHH to the public repo
 
-    `[DATASET]` could be `aghh` or `flhh`.
-
     ```bash
-    python send_clean.py [DATASET]
+    # See help information
+    python send_clean.py -h
     ```
