@@ -45,7 +45,7 @@ if __name__ == "__main__":
     sr = args.sr
     date_range = None
     auto_range = "W-SAT"
-    skip_convert_sensor = args.skipsensor
+    skip_convert_sensor = args.skipconvertsensor
     skip_signaligner = args.skipsignaligner
     skip_sync = args.skipsync
     correct_ori = not args.skipcorrect
