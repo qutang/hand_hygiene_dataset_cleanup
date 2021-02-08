@@ -29,7 +29,7 @@ def _get_expert_annotation_file(pid):
         return None
     elif len(expert_names) > 1:
         logger.warning(
-            "More than one expert annotation files are found!, Please double check the folder. Skip this one.")
+            "More than one expert annotation files are found!")
         return [os.path.join(expert_folder, expert_name) for expert_name in expert_names]
 
 
