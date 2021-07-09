@@ -19,7 +19,7 @@ def setup_args():
 if __name__ == "__main__":
     parser = setup_args()
     args = parser.parse_args()
-    root = args.dataset
+    root = args.root
     output_folder = args.output
 
     discard_annot_files = glob(os.path.join(

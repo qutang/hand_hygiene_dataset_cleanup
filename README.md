@@ -7,10 +7,16 @@ See the hosted unprocessed dataset at: https://github.com/qutang/hand_hygiene_da
 
 ## Install the local package before using the scripts
 
-```bash
-pip install -r requirements.txt
-```
+Make sure you have `nox` package installed.
 
+```bash
+# Run from the root of the directory
+nox -s dev-3.7 # if you are using python 3.7
+# nox -s dev-3.8
+# nox -s dev-3.9
+# then activate the dev virtual environment
+./.nox/dev-3.7/Scripts/activate
+```
 
 ## Usage
 
