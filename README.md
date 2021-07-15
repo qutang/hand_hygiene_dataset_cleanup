@@ -40,3 +40,9 @@ nox -s dev-3.7 # if you are using python 3.7
     # See help information
     python send_clean.py -h
     ```
+
+4. Compress and concat annotation videos
+
+    ```bash
+    python prepare_video.py -h
+    ```

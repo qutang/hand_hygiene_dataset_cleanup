@@ -22,7 +22,9 @@ VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'arus>=1.1.20', 'pyarrow'
+    'arus>=1.1.20', 'pyarrow',
+    'opencv-contrib-python>=4.4.0.44',
+    'tqdm', 'moviepy'
 ]
 
 # What packages are optional?
