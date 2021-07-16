@@ -48,24 +48,25 @@ def clean_up(root, pid, sr, skip_sync=False, remove_exists=True, annot_profile="
     logger.remove(handle_id)
 
 
-def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_location='subj_folder', correct_orientation=True, remove_exists=True):
+def convert_to_mhealth(root, pid, skip_sync=False, annot_profile="**", raw_location='subj_folder', correct_orientation=True, remove_exists=True, is_freeliving=False):
     master_folder = os.path.join(root, pid, arus.mh.MASTER_FOLDER)
     if remove_exists and os.path.exists(master_folder):
         logger.info(f'Remove existing {master_folder}')
         shutil.rmtree(master_folder)
     annot_df, task_annot_df = _convert_annotations(
-        root, pid, annot_profile=annot_profile)
+        root, pid, annot_profile=annot_profile, is_freeliving=is_freeliving)
     _convert_sensors(root, pid, data_type='IMUTenAxes',
                      skip_sync=skip_sync,
                      correct_orientation=correct_orientation,
                      raw_location=raw_location,
-                     annot_df=annot_df, task_annot_df=task_annot_df)
+                     annot_df=annot_df, task_annot_df=task_annot_df,
+                     is_freeliving=is_freeliving)
 
 
 def _convert_sensors(root, pid, data_type,
                      correct_orientation=True,
                      raw_location="subj_folder",
-                     skip_sync=True, annot_df=None, task_annot_df=None):
+                     skip_sync=True, annot_df=None, task_annot_df=None, is_freeliving=False):
     logger.info(
         f"Convert {data_type} data to mhealth format for hand hygiene raw dataset")
 
@@ -203,7 +204,7 @@ def filter_exist_cols(col_names, columns):
     return list(filter(lambda name: name in columns, col_names)), list(filter(lambda name: name not in columns, col_names))
 
 
-def _convert_annotations(root, pid, annot_profile='**'):
+def _convert_annotations(root, pid, annot_profile='**', is_freeliving=False):
     logger.info(
         "Convert annotation data to mhealth format for hand hygiene raw dataset")
     raw_annotation_files = glob.glob(os.path.join(
@@ -218,7 +219,7 @@ def _convert_annotations(root, pid, annot_profile='**'):
             bar.update()
             bar.set_description(
                 'Convert {} to mhealth'.format(raw_annotation_file))
-            if 'openset' in raw_annotation_file:
+            if is_freeliving:
                 annot_df = pd.read_csv(
                     raw_annotation_file, parse_dates=[0, 1])
                 annot_df.insert(0, 'HEADER_TIME_STAMP', annot_df.iloc[:, 0])

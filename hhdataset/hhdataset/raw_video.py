@@ -18,7 +18,6 @@ class RawVideo:
         self._folder = video_folder
 
     def overlap_and_stitch(self):
-        self.insert_blank()
         self.stitch_videos()
 
     def overlap_timestamps(self, cores=1):
@@ -86,7 +85,7 @@ class RawVideo:
             raise subprocess.CalledProcessError(p.returncode, cmd)
 
         end = time.time()
-        logger.info("Merging videos took", end - start, " seconds.")
+        logger.info(f"Merging videos took {end - start} seconds.")
 
         cmd = ["ffmpeg",
                "-i",
@@ -101,6 +100,11 @@ class RawVideo:
                "veryfast",
                "-n",
                final_output.replace(".mp4", "_640x480.mp4")]
+
+        p = subprocess.run(cmd, shell=True)
+
+        if p.returncode != 0:
+            raise subprocess.CalledProcessError(p.returncode, cmd)
 
         # Remvoe the temp file.txt
         os.remove(video_files)

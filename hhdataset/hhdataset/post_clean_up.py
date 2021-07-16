@@ -41,6 +41,12 @@ def _read_expert_annotation_file(filepath):
     raw_df = raw_df.loc[raw_df['SOURCE'] == "Player", :]
     expert_annot_df = raw_df.loc[:, ['HEADER_TIME_STAMP',
                                      'START_TIME', 'STOP_TIME', 'LABEL_NAME']]
+    expert_annot_df.loc[expert_annot_df['LABEL_NAME']
+                        == "Unknown 1", 'LABEL_NAME'] = "Left"
+    expert_annot_df.loc[expert_annot_df['LABEL_NAME']
+                        == "Unknown 2", 'LABEL_NAME'] = "Right"
+    expert_annot_df.loc[expert_annot_df['LABEL_NAME']
+                        == "Unknown 3", 'LABEL_NAME'] = "Both"
     return expert_annot_df
 
 
@@ -60,11 +66,8 @@ def _convert_expert_annotations(root, pid):
                 f'Remove existing expert annotation file {path}')
             os.remove(path)
         for src_expert_path in src_expert_paths:
-            dest_expert_path = os.path.join(
-                root, pid, "OriginalRaw", os.path.basename(src_expert_path))
-            shutil.copyfile(src_expert_path, dest_expert_path)
             expert_annot_df = _read_expert_annotation_file(
-                dest_expert_path)
+                src_expert_path)
 
             if expert_annot_df is not None:
                 writer = arus.mh.MhealthFileWriter(

@@ -58,7 +58,7 @@ if __name__ == "__main__":
                 root, pid, skip_sync, correct_orientation=correct_ori,
                 annot_profile='**',
                 raw_location='subj_folder',
-                remove_exists=False, skip_sensors=True)
+                remove_exists=False, is_freeliving=True)
         else:
             logger.info(
                 'Skip converting sensors to mhealth')
